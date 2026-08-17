@@ -157,3 +157,31 @@ func TestSampleSummary(t *testing.T) {
 		t.Fatalf("unexpected pending handover bottle")
 	}
 }
+
+func TestPendingHandoverRemainsVisibleAcrossDays(t *testing.T) {
+	svc, _ := newTestService(t)
+	point, err := svc.CreatePoint("湖心点", "西岸")
+	if err != nil {
+		t.Fatal(err)
+	}
+	batch, err := svc.CreateBatch(point.ID, "B007")
+	if err != nil {
+		t.Fatal(err)
+	}
+	if _, err := svc.AddBottle(batch.ID, "S011"); err != nil {
+		t.Fatal(err)
+	}
+	if err := svc.CompleteSampling(batch.ID); err != nil {
+		t.Fatal(err)
+	}
+	svc.SetNowFunc(func() time.Time {
+		return time.Date(2024, 1, 3, 0, 0, 0, 0, time.UTC)
+	})
+	summary, err := svc.SampleSummary()
+	if err != nil {
+		t.Fatal(err)
+	}
+	if len(summary.PendingHandover) != 1 {
+		t.Fatalf("older unfinished sample count = %d, want 1", len(summary.PendingHandover))
+	}
+}

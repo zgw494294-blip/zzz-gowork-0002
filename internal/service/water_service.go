@@ -299,6 +299,9 @@ func (s *WaterService) SampleSummary() (*SampleSummary, error) {
 			return nil, err
 		}
 		for _, btl := range bottles {
+			if btl.SampledAt != nil && btl.SampledAt.Before(s.now().Add(-24*time.Hour)) {
+				continue
+			}
 			switch btl.Status {
 			case domain.BottleSampled:
 				summary.PendingHandover = append(summary.PendingHandover, btl)

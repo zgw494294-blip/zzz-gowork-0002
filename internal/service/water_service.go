@@ -269,7 +269,7 @@ func (s *WaterService) ConfirmConclusion(batchID, conclusion string) (*domain.Co
 	}
 	// update bottles to concluded (optional but good)
 	for _, btl := range bottles {
-		btl.Status = domain.BottleConcluded
+		btl.Status = domain.BottleHandedOver
 		if err := s.st.SaveBottle(btl); err != nil {
 			return nil, err
 		}

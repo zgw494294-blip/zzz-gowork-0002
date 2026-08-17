@@ -157,3 +157,35 @@ func TestSampleSummary(t *testing.T) {
 		t.Fatalf("unexpected pending handover bottle")
 	}
 }
+
+func TestConcludedBatchIsAbsentFromPendingSummary(t *testing.T) {
+	svc, _ := newTestService(t)
+	point, err := svc.CreatePoint("河口点", "北岸")
+	if err != nil {
+		t.Fatal(err)
+	}
+	batch, err := svc.CreateBatch(point.ID, "B008")
+	if err != nil {
+		t.Fatal(err)
+	}
+	bottle, err := svc.AddBottle(batch.ID, "S012")
+	if err != nil {
+		t.Fatal(err)
+	}
+	if err := svc.CompleteSampling(batch.ID); err != nil {
+		t.Fatal(err)
+	}
+	if _, err := svc.HandoverBottle(bottle.ID, "采集组", "运输组", "常规交接"); err != nil {
+		t.Fatal(err)
+	}
+	if _, err := svc.ConfirmConclusion(batch.ID, "合格"); err != nil {
+		t.Fatal(err)
+	}
+	summary, err := svc.SampleSummary()
+	if err != nil {
+		t.Fatal(err)
+	}
+	if len(summary.PendingHandover) != 0 || len(summary.PendingConclusion) != 0 {
+		t.Fatalf("concluded batch remains pending: handover=%d conclusion=%d", len(summary.PendingHandover), len(summary.PendingConclusion))
+	}
+}

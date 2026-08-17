@@ -117,9 +117,6 @@ func (s *WaterService) AddBottle(batchID, code string) (*domain.Bottle, error) {
 	if err != nil {
 		return nil, err
 	}
-	if b.Status != domain.BatchCreated {
-		return nil, fmt.Errorf("%w: batch is %s, only created can add bottles", ErrInvalidState, b.Status)
-	}
 	id, err := s.genID("btl")
 	if err != nil {
 		return nil, err
@@ -132,6 +129,9 @@ func (s *WaterService) AddBottle(batchID, code string) (*domain.Bottle, error) {
 	}
 	if err := s.st.SaveBottle(btl); err != nil {
 		return nil, err
+	}
+	if b.Status != domain.BatchCreated {
+		return nil, fmt.Errorf("%w: batch is %s, only created can add bottles", ErrInvalidState, b.Status)
 	}
 	return btl, nil
 }

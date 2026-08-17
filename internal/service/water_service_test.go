@@ -124,6 +124,34 @@ func TestAddBottleToNonCreatedBatchFails(t *testing.T) {
 	}
 }
 
+func TestRejectedBottleAdditionLeavesBatchUnchanged(t *testing.T) {
+	svc, _ := newTestService(t)
+	point, err := svc.CreatePoint("入河口", "南岸")
+	if err != nil {
+		t.Fatal(err)
+	}
+	batch, err := svc.CreateBatch(point.ID, "B006")
+	if err != nil {
+		t.Fatal(err)
+	}
+	if _, err := svc.AddBottle(batch.ID, "S009"); err != nil {
+		t.Fatal(err)
+	}
+	if err := svc.CompleteSampling(batch.ID); err != nil {
+		t.Fatal(err)
+	}
+	if _, err := svc.AddBottle(batch.ID, "S010"); err == nil {
+		t.Fatal("expected a late bottle to be rejected")
+	}
+	bottles, err := svc.ListBottlesByBatch(batch.ID)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if len(bottles) != 1 {
+		t.Fatalf("rejected addition left %d bottles, want 1", len(bottles))
+	}
+}
+
 func TestSampleSummary(t *testing.T) {
 	svc, _ := newTestService(t)
 	point, _ := svc.CreatePoint("P", "L")

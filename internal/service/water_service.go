@@ -267,9 +267,9 @@ func (s *WaterService) ConfirmConclusion(batchID, conclusion string) (*domain.Co
 	if err := s.st.SaveBatch(b); err != nil {
 		return nil, err
 	}
-	// update bottles to concluded (optional but good)
+	// mark bottles as concluded so they leave the pending-summary lists
 	for _, btl := range bottles {
-		btl.Status = domain.BottleHandedOver
+		btl.Status = domain.BottleConcluded
 		if err := s.st.SaveBottle(btl); err != nil {
 			return nil, err
 		}

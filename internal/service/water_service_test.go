@@ -150,6 +150,18 @@ func TestRejectedBottleAdditionLeavesBatchUnchanged(t *testing.T) {
 	if len(bottles) != 1 {
 		t.Fatalf("rejected addition left %d bottles, want 1", len(bottles))
 	}
+	// The rejected bottle must not inflate the pending summary either: only the
+	// legitimate S009 should appear as pending handover.
+	summary, err := svc.SampleSummary()
+	if err != nil {
+		t.Fatal(err)
+	}
+	if len(summary.PendingHandover) != 1 {
+		t.Fatalf("expected 1 pending handover, got %d", len(summary.PendingHandover))
+	}
+	if summary.PendingHandover[0].Code != "S009" {
+		t.Fatalf("rejected bottle leaked into summary: %s", summary.PendingHandover[0].Code)
+	}
 }
 
 func TestSampleSummary(t *testing.T) {

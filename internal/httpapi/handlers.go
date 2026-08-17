@@ -186,7 +186,7 @@ func (h *Handler) handoverBottle(w http.ResponseWriter, r *http.Request) {
 		h.writeError(w, http.StatusNotFound, err)
 		return
 	}
-	if btl.BatchID == batchID {
+	if btl.BatchID != batchID {
 		h.writeError(w, http.StatusBadRequest, errMismatch)
 		return
 	}

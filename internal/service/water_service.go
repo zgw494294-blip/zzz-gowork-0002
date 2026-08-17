@@ -221,7 +221,7 @@ func (s *WaterService) HandoverBottle(bottleID, from, to, note string) (*domain.
 				}
 			}
 			if allHanded {
-				batch.Status = domain.BatchHandedOver
+				batch.Status = domain.BatchSampled
 				batch.UpdatedAt = now
 				if err := s.st.SaveBatch(batch); err != nil {
 					return nil, err

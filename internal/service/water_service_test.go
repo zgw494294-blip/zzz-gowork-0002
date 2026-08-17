@@ -157,3 +157,35 @@ func TestSampleSummary(t *testing.T) {
 		t.Fatalf("unexpected pending handover bottle")
 	}
 }
+
+func TestAllHandedBottlesPermitConclusion(t *testing.T) {
+	svc, _ := newTestService(t)
+	point, err := svc.CreatePoint("下游河段", "北岸")
+	if err != nil {
+		t.Fatal(err)
+	}
+	batch, err := svc.CreateBatch(point.ID, "B005")
+	if err != nil {
+		t.Fatal(err)
+	}
+	first, err := svc.AddBottle(batch.ID, "S007")
+	if err != nil {
+		t.Fatal(err)
+	}
+	second, err := svc.AddBottle(batch.ID, "S008")
+	if err != nil {
+		t.Fatal(err)
+	}
+	if err := svc.CompleteSampling(batch.ID); err != nil {
+		t.Fatal(err)
+	}
+	if _, err := svc.HandoverBottle(first.ID, "采集组", "运输组", "冷链交接"); err != nil {
+		t.Fatal(err)
+	}
+	if _, err := svc.HandoverBottle(second.ID, "采集组", "运输组", "冷链交接"); err != nil {
+		t.Fatal(err)
+	}
+	if _, err := svc.ConfirmConclusion(batch.ID, "合格"); err != nil {
+		t.Fatalf("all handed-over bottles should allow a conclusion: %v", err)
+	}
+}
